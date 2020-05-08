@@ -1,0 +1,29 @@
+{
+    "items":
+    [
+        {
+            "name": "Apple",
+            "price": 0.29,
+            "image": "image/apple.jpg",
+            "info": "This is an apple."
+        },
+        {
+            "name": "Orange",
+            "price": 0.99,
+            "image": "image/orange.jpg",
+            "info": "This is an orange orange."
+        },
+        {
+            "name": "Pear",
+            "price": 0.29,
+            "image": "image/pear.jpg",
+            "info": "This is a pear."
+        },
+        {
+            "name": "Banana",
+            "price": 0.79,
+            "image": "image/banana.jpg",
+            "info": "This is a banana. Yummy!"
+        }
+    ]
+}
