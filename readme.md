@@ -6,6 +6,10 @@
 
     docker run -d -p 27017:27017 --name mongodb mongo
 
-3) Start backend by executing 'main.exe'. The script populates the database
-with default data from db/data.json, sets up the required endpoint
-('http://localhost:12345/items') and starts a http server.
+3) Start backend by executing 'main.exe'. The main case
+    - initializes the database connection,
+    - populates the database with default data from 'db/data.json',
+    - sets up the required endpoints (
+        'http://localhost:12345/items'
+        'http://localhost:12345/checkPayment')
+    - and starts a http server.
