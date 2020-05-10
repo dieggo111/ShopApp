@@ -10,6 +10,8 @@
     - initializes the database connection,
     - populates the database with default data from 'db/data.json',
     - sets up the required endpoints (
-        'http://localhost:12345/items'
-        'http://localhost:12345/checkPayment')
+        - 'http://localhost:12345/items'
+        - 'http://localhost:12345/check'
+        - 'http://localhost:12345/createUser')
+
     - and starts a http server.

@@ -1,5 +1,7 @@
 <template>
-    <div class="items_table">
+    <div class="items-table">
+        <h2>Shop</h2>
+        <hr>
         <b-table id="table" striped hover :items="items">
             <template v-slot:cell(image)="{value}">
                 <!-- <v-img :src="value" width="100px"></v-img> -->
@@ -37,5 +39,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-
+@import '../_styles.sass'
+h2
+    text-align: center
 </style>

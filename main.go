@@ -32,6 +32,13 @@ type itemList struct {
 
 //User object provides interface for users collection
 type User struct {
+	Name  string `json:"name" bson:"name"`
+	Email string `json:"email" bson:"email"`
+	Pwd   string `json:"pwd" bson:"pwd"`
+}
+
+//Cred object provides interface for credentials
+type Cred struct {
 	Name string `json:"name" bson:"name"`
 	Pwd  string `json:"pwd" bson:"pwd"`
 }
@@ -39,26 +46,22 @@ type User struct {
 var mongoURL string = "mongodb://localhost:27017"
 var dbName string = "cinemo_db"
 var dataPath string = "db/data.json"
+var port string = ":12345"
 var client *mongo.Client
 
 func main() {
-	fmt.Println("Start Cinemo Trial App...")
+	fmt.Println("Starting Cinemo Trial App...")
 	connectMongo()
 	initItemsCollection()
 	initUsersCollection()
 
+	fmt.Println("Starting go-server...")
 	router := mux.NewRouter()
-	// handler := handlers.LoggingHandler(os.Stdout, handlers.CORS(
-	// 	handlers.AllowedOrigins([]string{"*"}),
-	// 	handlers.AllowedMethods([]string{"GET", "POST"}),
-	// 	handlers.AllowedHeaders([]string{"Content-Type"}),
-	// )(router))
-	// handler = handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))(handler)
-
 	router.HandleFunc("/items", FetchAllItemsEndpoint).Methods("GET")
-	router.HandleFunc("/check", CheckTransactionEndpoint).Methods("POST")
+	router.HandleFunc("/checkTransaction", CheckTransactionEndpoint).Methods("POST")
 	router.HandleFunc("/createUser", CreateUserEndpoint).Methods("POST")
-	http.ListenAndServe(":12345", router)
+	router.HandleFunc("/checkCred", CheckCredEndpoint).Methods("POST")
+	http.ListenAndServe(port, router)
 }
 
 func connectMongo() {
@@ -68,7 +71,7 @@ func connectMongo() {
 	err := client.Connect(ctx)
 
 	if err = client.Ping(ctx, readpref.Primary()); err != nil {
-		fmt.Printf("could not ping to mongo db service: %v\n", err)
+		log.Fatalf("could not ping to mongo db service: %v\n", err)
 	}
 
 	fmt.Println("connected to nosql database:", mongoURL)
@@ -147,17 +150,15 @@ func initUsersCollection() {
 		log.Println(err)
 	}
 	log.Println("Created unique key in users collection:", index)
-	addUser("root", "root")
+	addUser("root", "root@root.com", "root")
 }
 
-func addUser(name string, pwd string) bool {
-	if name == "" || pwd == "" {
-		return false
-	}
+func addUser(name string, email string, pwd string) bool {
 	hash := hashAndSalt([]byte(pwd))
 	userCollection := client.Database(dbName).Collection("users")
 	result, err := userCollection.InsertOne(context.TODO(), bson.D{
 		{Key: "name", Value: name},
+		{Key: "email", Value: email},
 		{Key: "pwd", Value: hash},
 	})
 	if err != nil {
@@ -175,6 +176,21 @@ func hashAndSalt(pwd []byte) string {
 		return ""
 	}
 	return string(hash)
+}
+
+func checkCred(name string, pwd string) bool {
+	userCollection := client.Database(dbName).Collection("users")
+	hash := hashAndSalt([]byte(pwd))
+	result, err := userCollection.Find(context.TODO(), bson.D{
+		{Key: "name", Value: name},
+		{Key: "pwd", Value: hash},
+	})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	log.Println(result)
+	return true
 }
 
 //FetchAllItemsEndpoint returns all items of the 'items' collection
@@ -214,6 +230,20 @@ func CreateUserEndpoint(response http.ResponseWriter, request *http.Request) {
 	response.Header().Add("Access-Control-Allow-Origin", "*")
 	var user User
 	json.NewDecoder(request.Body).Decode(&user)
-	addUser(user.Name, user.Pwd)
-	json.NewEncoder(response).Encode("User could not be created...")
+	check := addUser(user.Name, user.Email, user.Pwd)
+	if check == true {
+		json.NewEncoder(response).Encode("User was created successfully ...")
+	} else {
+		json.NewEncoder(response).Encode("User could not be created...")
+	}
+}
+
+//CheckCredEndpoint checks user credentials in 'users' collection and returns token
+func CheckCredEndpoint(response http.ResponseWriter, request *http.Request) {
+	response.Header().Add("content-type", "application/json")
+	response.Header().Add("Access-Control-Allow-Origin", "*")
+	var cred Cred
+	json.NewDecoder(request.Body).Decode(&cred)
+	check := checkCred(cred.Name, cred.Pwd)
+	json.NewEncoder(response).Encode(check)
 }

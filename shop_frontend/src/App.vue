@@ -1,30 +1,21 @@
-<template lang="pug">
+<template>
     <div class="app">
-        <header>The Fruit Shop</header>
-        <hr>
-        <div class="main" v-if="auth == true">
-            <TableComponent v-bind:items="items" @addItem="updateCart"/>
-            <CartComponent v-bind:cart="cart"/>
-        </div>
-        <div class="auth" v-if="auth == false">
-            <AuthComponent/>
-        </div>
+        <b-navbar variant="info" type="dark">
+            <b-navbar-brand tag="h1" class="mb-0">The Fruit Shop</b-navbar-brand>
+            <b-navbar-nav>
+                <b-nav-item class="nav-item" href="/shop">Shop</b-nav-item>
+                <b-nav-item class="nav-item" href="#">Shopping Cart</b-nav-item>
+                <b-nav-item class="nav-item" href="/login">Log In</b-nav-item>
+                <b-nav-item class="nav-item" href="/signup">Sign Up</b-nav-item>
+            </b-navbar-nav>
+        </b-navbar>
+        <router-view :items="items" @addItem="updateCart"></router-view>
     </div>
 </template>
 
 <script>
-
-import TableComponent from './components/TableComponent.vue'
-import CartComponent from './components/CartComponent.vue'
-import AuthComponent from './components/AuthComponent.vue'
-
 export default {
     name: 'App',
-    components: {
-        TableComponent,
-        CartComponent,
-        AuthComponent,
-    },
     data(){
         return{
             items: [],
@@ -45,8 +36,10 @@ export default {
                     this.items = res;
                     this.adjustItems();
                     this.setCart(res);
-                    });
-
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         },
         adjustItems(){
             for (let i in this.items) {
