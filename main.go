@@ -44,13 +44,13 @@ type Cred struct {
 }
 
 var mongoURL string = "mongodb://localhost:27017"
-var dbName string = "cinemo_db"
+var dbName string = "mongodb"
 var dataPath string = "db/data.json"
 var port string = ":12345"
 var client *mongo.Client
 
 func main() {
-	fmt.Println("Starting Cinemo Trial App...")
+	fmt.Println("Starting Fruit Shop backend...")
 	connectMongo()
 	initItemsCollection()
 	initUsersCollection()
@@ -72,9 +72,10 @@ func connectMongo() {
 
 	if err = client.Ping(ctx, readpref.Primary()); err != nil {
 		log.Fatalf("could not ping to mongo db service: %v\n", err)
+	} else {
+		log.Println("connected to nosql database:", mongoURL)
 	}
 
-	fmt.Println("connected to nosql database:", mongoURL)
 }
 
 func initItemsCollection() {
@@ -94,7 +95,7 @@ func initItemsCollection() {
 }
 
 func createDatabaseEntries(client *mongo.Client) {
-	fmt.Println("Creating Cinemo Database...")
+	fmt.Println("Creating Mongo Database...")
 	itemsCollection := client.Database(dbName).Collection("items")
 
 	stream, err := os.Open(dataPath)
@@ -137,15 +138,19 @@ func checkIfIn(item string, list []string) bool {
 func initUsersCollection() {
 	fmt.Println("Creating users collection...")
 	userCollection := client.Database(dbName).Collection("users")
-	index, err := userCollection.Indexes().CreateOne(
-		context.TODO(),
-		mongo.IndexModel{
-			Keys: bson.M{
-				"name": 1,
-			},
-			Options: options.Index().SetUnique(true),
+	models := []mongo.IndexModel{
+		{
+			Keys: bson.M{"name": 1}, Options: options.Index().SetUnique(true),
 		},
+		{
+			Keys: bson.M{"email": 1}, Options: options.Index().SetUnique(true),
+		},
+	}
+	index, err := userCollection.Indexes().CreateMany(
+		context.TODO(),
+		models,
 	)
+
 	if err != nil {
 		log.Println(err)
 	}
