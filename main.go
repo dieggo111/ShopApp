@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -60,7 +61,8 @@ func main() {
 	router.HandleFunc("/items", FetchAllItemsEndpoint).Methods("GET")
 	router.HandleFunc("/checkTransaction", CheckTransactionEndpoint).Methods("POST")
 	router.HandleFunc("/createUser", CreateUserEndpoint).Methods("POST")
-	router.HandleFunc("/checkCred", CheckCredEndpoint).Methods("POST")
+	router.HandleFunc("/login", LoginEndpoint).Methods("POST")
+	router.HandleFunc("/logout", LogoutEndpoint).Methods("POST")
 	http.ListenAndServe(port, router)
 }
 
@@ -183,19 +185,46 @@ func hashAndSalt(pwd []byte) string {
 	return string(hash)
 }
 
-func checkCred(name string, pwd string) bool {
+func checkCred(name string, pwd []byte) bool {
 	userCollection := client.Database(dbName).Collection("users")
-	hash := hashAndSalt([]byte(pwd))
-	result, err := userCollection.Find(context.TODO(), bson.D{
+	log.Println("Checking creds...")
+	cursor, err := userCollection.Find(context.TODO(), bson.D{
 		{Key: "name", Value: name},
-		{Key: "pwd", Value: hash},
 	})
 	if err != nil {
 		log.Println(err)
 		return false
 	}
-	log.Println(result)
+	var user User
+	for cursor.Next(context.TODO()) {
+		cursor.Decode(&user)
+	}
+	log.Println(user)
+	byteHash := []byte(user.Pwd)
+	result := bcrypt.CompareHashAndPassword(byteHash, pwd)
+	if result != nil {
+		log.Println("invalid password...")
+		return false
+	}
+	log.Println("User authenticated...")
 	return true
+}
+
+// createToken creates and returns a JWT token. The token implementation, as it
+// is, is just a placeholder and NOT production ready.
+func createToken(username string) (string, error) {
+	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
+	atClaims := jwt.MapClaims{}
+	atClaims["authorized"] = true
+	atClaims["username"] = username
+	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
+	log.Println("token")
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 //FetchAllItemsEndpoint returns all items of the 'items' collection
@@ -249,6 +278,40 @@ func CheckCredEndpoint(response http.ResponseWriter, request *http.Request) {
 	response.Header().Add("Access-Control-Allow-Origin", "*")
 	var cred Cred
 	json.NewDecoder(request.Body).Decode(&cred)
-	check := checkCred(cred.Name, cred.Pwd)
-	json.NewEncoder(response).Encode(check)
+	if checkCred(cred.Name, []byte(cred.Pwd)) {
+		token, err := createToken(cred.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		json.NewEncoder(response).Encode(token)
+	} else {
+		response.WriteHeader(401)
+	}
+}
+
+//LoginEndpoint checks user credentials in 'users' collection and returns token
+func LoginEndpoint(response http.ResponseWriter, request *http.Request) {
+	response.Header().Add("content-type", "application/json")
+	response.Header().Add("Access-Control-Allow-Origin", "*")
+	var cred Cred
+	json.NewDecoder(request.Body).Decode(&cred)
+	if checkCred(cred.Name, []byte(cred.Pwd)) {
+		token, err := createToken(cred.Name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		json.NewEncoder(response).Encode(token)
+	} else {
+		response.WriteHeader(401)
+	}
+}
+
+//LogoutEndpoint invokes possible logout procedures on server
+func LogoutEndpoint(response http.ResponseWriter, request *http.Request) {
+	response.Header().Add("content-type", "application/json")
+	response.Header().Add("Access-Control-Allow-Origin", "*")
+	var token string
+	json.NewDecoder(request.Body).Decode(&token)
+	log.Println(token)
+	response.WriteHeader(200)
 }

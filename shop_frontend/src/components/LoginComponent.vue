@@ -37,16 +37,15 @@ export default {
     },
     methods: {
         login() {
-            console.log("login")
-            fetch('http://localhost:12345/checkCred', {
-                method: 'post',
-                body: JSON.stringify({
-                    username: this.username,
-                    password: this.password})})
-                .then(res => res.json())
-                .then(res => {
-                    console.log(res);})
+            this.$store.dispatch("retrieveToken", {
+                    name: this.username,
+                    pwd: this.password}
+            )
+            .then(
+                this.$router.push("/shop")
+            )
         }
+
     }
 };
 </script>
