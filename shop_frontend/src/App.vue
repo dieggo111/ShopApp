@@ -47,28 +47,36 @@ export default {
         addUtilityItems(items){
             for (let i in items) {
                 items[i]["add"] = ""
-                items[i]["quantity"] = 1
+                items[i]["quantity"] = 0
             }
             return items
         },
-        getNamesAndPrice(items){
+        getNameList(items){
             var nameList = []
-            var priceList = {}
             for (let i in items) {
                 nameList.push(items[i].name)
-                priceList[items[i].name] = items[i].price
             }
-            // console.log("getItemNames")
-            // console.log(itemNames)
             this.$store.commit("setNameList", nameList)
-            this.$store.commit("setPriceList", priceList)
             return nameList
         },
+        getPriceList(items) {
+            var priceList = {}
+            for (let i in items) {
+                priceList[items[i].name] = items[i].price
+            }
+            this.$store.commit("setPriceList", priceList)
+            return priceList
+        },
         prepareCart(items){
-            var nameList = this.getNamesAndPrice(items)
+            this.getNameList(items)
+            this.getPriceList(items)
             var cart = {}
-            for (let i in nameList) {
-                cart[nameList[i]] = 0
+            for (let i in items) {
+                cart[items[i].name] = {
+                    "name": items[i].name,
+                    "price": items[i].price,
+                    "quantity": 0,
+                }
             }
             this.$store.commit("initCart", cart)
             this.$store.commit("setDefaultQuantities", cart)

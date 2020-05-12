@@ -12,6 +12,7 @@ import LoginComponent from './components/LoginComponent'
 import LogoutComponent from './components/LogoutComponent'
 import SignupComponent from './components/SignupComponent'
 import ShopComponent from './components/ShopComponent'
+import CheckOutComponent from './components/CheckOutComponent'
 
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
@@ -27,10 +28,8 @@ const routes = [
     { path: '/logout', component: LogoutComponent },
     { path: '/shop', component: ShopComponent, meta: {requiresAuth: true}},
     { path: '/signup', component: SignupComponent },
-    // { path: '/cart', component: Component },
+    { path: '/checkout', component: CheckOutComponent, meta: {requiresAuth: true}},
 ]
-
-
 
 const router = new VueRouter({
     routes,

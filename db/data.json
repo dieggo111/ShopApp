@@ -4,13 +4,13 @@
         {
             "name": "Apple",
             "price": 0.29,
-            "image": "../images/apple.jpg",
+            "image": "https://i5.walmartimages.ca/images/Enlarge/094/514/6000200094514.jpg",
             "info": "This is an apple."
         },
         {
             "name": "Orange",
             "price": 0.99,
-            "image": "../images/orange.jpg",
+            "image": "http://iranfreshfruit.net/wp-content/uploads/2020/01/ORANGE.jpg",
             "info": "This is an orange orange."
         },
         {
