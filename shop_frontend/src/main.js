@@ -27,6 +27,7 @@ const routes = [
     { path: '/logout', component: LogoutComponent },
     { path: '/shop', component: ShopComponent, meta: {requiresAuth: true}},
     { path: '/signup', component: SignupComponent },
+    // { path: '/cart', component: Component },
 ]
 
 

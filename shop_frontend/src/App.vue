@@ -1,11 +1,8 @@
 <template>
     <div class="app">
         <b-navbar variant="info" type="dark">
-            <b-navbar-brand tag="h1" class="mb-0">The Fruit Shop</b-navbar-brand>
+            <b-navbar-brand tag="h1" class="mb-0" href="/shop">The Fruit Shop</b-navbar-brand>
             <b-navbar-nav class="nav">
-                <b-nav-item v-if="!loggedIn" class="nav-item" href="/login">Shop</b-nav-item>
-                <b-nav-item v-if="loggedIn" class="nav-item" href="/shop">Shop</b-nav-item>
-                <b-nav-item class="nav-item" href="#">Shopping Cart</b-nav-item>
                 <b-nav-item class="nav-item" href="/signup">Sign Up</b-nav-item>
                 <b-nav-item v-if="loggedIn" class="nav-item" href="/logout">Logout</b-nav-item>
                 <b-nav-item v-if="!loggedIn" class="nav-item" href="/login">Login</b-nav-item>
@@ -24,7 +21,7 @@ export default {
             auth: false,
         };
     },
-    mounted(){
+    created(){
         this.fetchItems()
         // this.$eventBus.$on("addItem", (idx) => this.updateCart(idx))
     },
@@ -38,10 +35,10 @@ export default {
             fetch('http://localhost:12345/items')
                 .then(res => res.json())
                 .then(res => {
-                    console.log(this.addUtilityItems(res));
+                    console.log(this.addUtilityItems(res))
                     this.$store.commit(
-                        "setShopItems", this.addUtilityItems(res));
-                    this.prepareCart(res);
+                        "setShopItems", this.addUtilityItems(res))
+                    this.prepareCart(res)
                 })
                 .catch(error => {
                     console.log(error)
@@ -54,25 +51,27 @@ export default {
             }
             return items
         },
-        getItemNames(items){
-            var itemNames = []
+        getNamesAndPrice(items){
+            var nameList = []
+            var priceList = {}
             for (let i in items) {
-                itemNames.push(items[i].name)
+                nameList.push(items[i].name)
+                priceList[items[i].name] = items[i].price
             }
             // console.log("getItemNames")
             // console.log(itemNames)
-            this.$store.commit("setItemNames", itemNames)
-            return itemNames
+            this.$store.commit("setNameList", nameList)
+            this.$store.commit("setPriceList", priceList)
+            return nameList
         },
         prepareCart(items){
-            var itemNames = this.getItemNames(items);
-            var cart = {};
-            for (let i in itemNames) {
-                cart[itemNames[i]] = 0
+            var nameList = this.getNamesAndPrice(items)
+            var cart = {}
+            for (let i in nameList) {
+                cart[nameList[i]] = 0
             }
-            // console.log("prepareCart");
-            // console.log(cart);
-            this.$store.commit("initCart", cart);
+            this.$store.commit("initCart", cart)
+            this.$store.commit("setDefaultQuantities", cart)
         }
     }
 }

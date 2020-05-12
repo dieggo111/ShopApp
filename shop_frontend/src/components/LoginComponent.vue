@@ -36,7 +36,7 @@ export default {
     // },
     computed: {
         validate() {
-            if (this.$store.invalidAuthenticationStatus === true) {
+            if (this.$store.state.invalidAuthenticationStatus === true) {
                 return false
             }
             return null
