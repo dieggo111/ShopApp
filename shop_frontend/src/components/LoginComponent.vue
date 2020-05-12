@@ -3,11 +3,11 @@
         <h2>Login</h2>
         <b-form class="form" @submit.prevent="login">
             <label for="feedback-user">Username</label>
-            <b-input v-model="username" :state="validate" id="feedback-user"></b-input>
+            <b-form-input v-model="username" :state="validate" id="feedback-user"></b-form-input>
                 <b-form-invalid-feedback :state="validate">
                 </b-form-invalid-feedback>
-            <label for="feedback-user">Password</label>
-            <b-input v-model="password" :state="validate" id="feedback-user"></b-input>
+            <label for="feedback-password">Password</label>
+            <b-form-input v-model="password" :type="'password'" :state="validate" id="feedback-password"></b-form-input>
                 <b-form-invalid-feedback :state="validate">
                     Username and/or password are not correct.
                 </b-form-invalid-feedback>
@@ -24,27 +24,44 @@ export default {
         return {
             username: "",
             password: "",
-            checkInput: false,
+            authenticationStatus: null,
+            // invalidFeedback: [
+            //     "Username and/or password are not correct.",
+            //     "Enter Username and password."
+            // ]
         }
     },
+    // updated() {
+    //     this.getAuthenticationStatus()
+    // },
     computed: {
         validate() {
-            if (this.username != "" || this.password != "") {
-                return null
+            if (this.$store.invalidAuthenticationStatus === true) {
+                return false
             }
-            return this.checkInput
+            return null
         }
     },
     methods: {
         login() {
+            console.log(this.password)
             this.$store.dispatch("retrieveToken", {
                     name: this.username,
-                    pwd: this.password}
-            )
-            .then(
+                    pwd: this.password
+            })
+            .then(response => {
                 this.$router.push("/shop")
-            )
-        }
+                return response
+            })
+        },
+        // getAuthenticationStatus() {
+        //     console.log(this.authenticationStatus)
+        //     if (this.authenticationStatus === true && !this.$store.getters.loggedIn) {
+        //         this.authenticationStatus = null
+        //     } else {
+        //         this.authenticationStatus = this.$store.getters.loggedIn
+        //     }
+        // }
 
     }
 };

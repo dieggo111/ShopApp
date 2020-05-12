@@ -25,14 +25,31 @@ Vue.prototype.$eventBus = new Vue()
 const routes = [
     { path: '/login', component: LoginComponent },
     { path: '/logout', component: LogoutComponent },
-    { path: '/shop', component: ShopComponent },
+    { path: '/shop', component: ShopComponent, meta: {requiresAuth: true}},
     { path: '/signup', component: SignupComponent },
 ]
+
+
 
 const router = new VueRouter({
     routes,
     mode: 'history'
 })
+
+router.beforeEach((to, from, next) => {
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!store.getters.loggedIn) {
+            next({
+                path: '/shop',
+                query: { redirect: '/login' }
+            })
+        } else {
+            next()
+        }
+    } else {
+      next()
+    }
+  })
 
 new Vue({
     el:'#app',
