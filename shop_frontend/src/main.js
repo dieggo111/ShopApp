@@ -46,6 +46,14 @@ router.beforeEach((to, from, next) => {
         } else {
             next()
         }
+        if (!store.getters.loggedIn) {
+            next({
+                path: '/checkout',
+                query: { redirect: '/login' }
+            })
+        } else {
+            next()
+        }
     } else {
       next()
     }

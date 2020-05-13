@@ -46,7 +46,7 @@ type Cred struct {
 
 var mongoURL string = "mongodb://localhost:27017"
 var dbName string = "mongodb"
-var dataPath string = "db/data.json"
+var dataPath string = "db/items.json"
 var port string = ":12345"
 var client *mongo.Client
 

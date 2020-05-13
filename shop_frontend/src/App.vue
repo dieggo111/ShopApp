@@ -23,7 +23,6 @@ export default {
     },
     created(){
         this.fetchItems()
-        // this.$eventBus.$on("addItem", (idx) => this.updateCart(idx))
     },
     computed: {
         loggedIn() {
