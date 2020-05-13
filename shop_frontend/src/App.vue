@@ -77,7 +77,7 @@ export default {
                     "quantity": 0,
                 }
             }
-            this.$store.commit("initCart", cart)
+            this.$store.dispatch("initCart", cart)
             this.$store.commit("setDefaultQuantities", cart)
         }
     }
