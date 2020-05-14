@@ -1,0 +1,29 @@
+{
+    "items":
+    [
+        {
+            "name": "Apple",
+            "price": 0.29,
+            "image": "https://i5.walmartimages.ca/images/Enlarge/094/514/6000200094514.jpg",
+            "info": "This is an apple."
+        },
+        {
+            "name": "Orange",
+            "price": 0.99,
+            "image": "http://iranfreshfruit.net/wp-content/uploads/2020/01/ORANGE.jpg",
+            "info": "This is an orange orange."
+        },
+        {
+            "name": "Pear",
+            "price": 0.29,
+            "image": "https://i5.walmartimages.ca/images/Large/799/2_r/6000196087992_R.jpg",
+            "info": "This is a pear."
+        },
+        {
+            "name": "Banana",
+            "price": 0.79,
+            "image": "https://cdn.mos.cms.futurecdn.net/42E9as7NaTaAi4A6JcuFwG-650-80.jpg",
+            "info": "This is a banana. Yummy!"
+        }
+    ]
+}

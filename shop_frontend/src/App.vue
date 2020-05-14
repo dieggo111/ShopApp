@@ -1,7 +1,7 @@
 <template>
     <div class="app">
-        <b-navbar variant="info" type="dark">
-            <b-navbar-brand tag="h1" class="mb-0" href="/shop">The Fruit Shop</b-navbar-brand>
+        <b-navbar class="navbar" fixed="top" variant="info" type="dark">
+            <b-navbar-brand  tag="h1" class="mb-0" href="/shop">The Fruit Shop</b-navbar-brand>
             <b-navbar-nav class="nav">
                 <b-nav-item class="nav-item" href="/signup">Sign Up</b-nav-item>
                 <b-nav-item v-if="loggedIn" class="nav-item" href="/logout">Logout</b-nav-item>
@@ -34,7 +34,7 @@ export default {
             fetch('http://localhost:12345/items')
                 .then(res => res.json())
                 .then(res => {
-                    console.log(this.addUtilityItems(res))
+                    // console.log(this.addUtilityItems(res))
                     this.$store.commit(
                         "setShopItems", this.addUtilityItems(res))
                     this.prepareCart(res)
