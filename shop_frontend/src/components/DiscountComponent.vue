@@ -16,7 +16,7 @@
             <b-card title="Orange Madness Coupon" img-src="http://iranfreshfruit.net/wp-content/uploads/2020/01/ORANGE.jpg" img-alt="Image"
             img-top tag="article" style="max-width: 20rem; " class="mr-5">
                 <b-card-text>
-                    Use the coupon code "madness" in order to get a 30% discount on oranges!
+                    Redeem coupon before purchase in order to get a 30% discount on oranges!
                 </b-card-text>
             </b-card>
         </b-row>

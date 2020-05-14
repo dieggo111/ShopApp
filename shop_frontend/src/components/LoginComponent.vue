@@ -25,18 +25,11 @@ export default {
             username: "",
             password: "",
             authenticationStatus: null,
-            // invalidFeedback: [
-            //     "Username and/or password are not correct.",
-            //     "Enter Username and password."
-            // ]
         }
     },
-    // updated() {
-    //     this.getAuthenticationStatus()
-    // },
     computed: {
         validate() {
-            if (this.$store.state.invalidAuthenticationStatus === true) {
+            if (this.authenticationStatus === false) {
                 return false
             }
             return null
@@ -44,25 +37,20 @@ export default {
     },
     methods: {
         login() {
-            console.log(this.password)
             this.$store.dispatch("retrieveToken", {
                     name: this.username,
                     pwd: this.password
             })
             .then(response => {
+                console.log("login", response)
                 this.$router.push("/shop")
                 return response
             })
+            .catch(error => {
+                this.authenticationStatus = false
+                return error
+            })
         },
-        // getAuthenticationStatus() {
-        //     console.log(this.authenticationStatus)
-        //     if (this.authenticationStatus === true && !this.$store.getters.loggedIn) {
-        //         this.authenticationStatus = null
-        //     } else {
-        //         this.authenticationStatus = this.$store.getters.loggedIn
-        //     }
-        // }
-
     }
 };
 </script>

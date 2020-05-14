@@ -7,12 +7,13 @@ export const store = new Vuex.Store({
     state: {
         shoppingList: JSON.parse(localStorage.getItem("shoppingList")) || [],
         token: localStorage.getItem("access_token") || null,
-        invalidAuthenticationStatus: false,
         cart: {},
         items: [],
         nameList: [],
         priceList: {},
         defaultQuantities: {},
+        transactionStatus: false,
+        coupon: localStorage.getItem("access_token") || null,
     },
     getters: {
         loggedIn(state) {
@@ -56,9 +57,13 @@ export const store = new Vuex.Store({
         getPriceList(state) {
             return state.priceList
         },
+        getTransactionStatus(state) {
+            return state.transactionStatus
+        }
     },
     mutations: {
         retrieveToken(state, token) {
+            console.log("set token", token)
             state.token = token
         },
         destroyToken(state) {
@@ -72,9 +77,6 @@ export const store = new Vuex.Store({
         },
         setItemNames(state, nameList) {
             state.itemNames = nameList
-        },
-        setInvalidAuthenticationStatus(state, value) {
-            state.authenticationStatus = value
         },
         setDefaultQuantities(state, cart) {
             Object.keys(cart).forEach((key) => {
@@ -98,6 +100,12 @@ export const store = new Vuex.Store({
         },
         resetCart(state) {
             state.cart = []
+        },
+        transactionStatus(state, value) {
+            state.transactionStatus = value
+        },
+        setCoupon(state, token) {
+            state.coupon = token
         }
     },
     actions: {
@@ -110,19 +118,15 @@ export const store = new Vuex.Store({
                         if (res.ok) {
                             return res.json()
                         }
-                        return res
+                        throw new Error(res.status)
                     })
                     .then(res => {
                         console.log(res)
                         localStorage.setItem("access_token", res)
                         context.commit("retrieveToken", res)
-                        context.commit("setInvalidAuthenticationStatus", false)
                         resolve(res)
                         })
                     .catch(error => {
-                        console.log("error with retrieveToken")
-                        // console.log(error);
-                        context.commit("setInvalidAuthenticationStatus", true)
                         reject(error)
                     })
                 })
@@ -137,13 +141,11 @@ export const store = new Vuex.Store({
                     .then(res => {
                         localStorage.removeItem("access_token")
                         context.commit("destroyToken")
-                        context.commit("setInvalidAuthenticationStatus", false)
                         resolve(res)
                         })
                     .catch(error => {
                         localStorage.removeItem("access_token")
                         context.commit("destroyToken")
-                        context.commit("setInvalidAuthenticationStatus", false)
                         reject(error)
                     })
                 })
@@ -172,6 +174,36 @@ export const store = new Vuex.Store({
             localStorage.removeItem("cart")
             localStorage.removeItem("shoppingList")
             context.commit("setCart", [])
+        },
+        checkPayment(context) {
+            return new Promise((resolve, reject) => {
+                fetch('http://localhost:12345/checkTransaction', {
+                    method: 'post',
+                    body: 1001
+                })
+                .then(res => res.json())
+                .then(res => {
+                    if (res === true) {
+                        console.log("Transaction successful")
+                        context.commit("transactionStatus", true)
+                        resolve(res)
+                    } else {
+                        reject(res)
+                    }
+                    })
+                .catch(error => {
+                    reject(error)
+                })
+            })
+        },
+        getCoupon(context) {
+            fetch('http://localhost:12345/getCoupon')
+                .then(res => res.json())
+                .then(res => {
+                    localStorage.setItem("coupon_token", res)
+                    console.log(res)
+                    context.commit("setCoupon", res)
+                })
         }
     }
 });

@@ -63,6 +63,7 @@ func main() {
 	router.HandleFunc("/createUser", CreateUserEndpoint).Methods("POST")
 	router.HandleFunc("/login", LoginEndpoint).Methods("POST")
 	router.HandleFunc("/logout", LogoutEndpoint).Methods("POST")
+	router.HandleFunc("/getCoupon", GetCouponEndpoint).Methods("GET")
 	http.ListenAndServe(port, router)
 }
 
@@ -212,12 +213,12 @@ func checkCred(name string, pwd []byte) bool {
 
 // createToken creates and returns a JWT token. The token implementation, as it
 // is, is just a placeholder and NOT production ready.
-func createToken(username string) (string, error) {
+func createToken(username string, validTime int) (string, error) {
 	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["username"] = username
-	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	atClaims["exp"] = time.Now().Add(time.Second * validtime).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
 	log.Println("token")
@@ -272,23 +273,6 @@ func CreateUserEndpoint(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//CheckCredEndpoint checks user credentials in 'users' collection and returns token
-func CheckCredEndpoint(response http.ResponseWriter, request *http.Request) {
-	response.Header().Add("content-type", "application/json")
-	response.Header().Add("Access-Control-Allow-Origin", "*")
-	var cred Cred
-	json.NewDecoder(request.Body).Decode(&cred)
-	if checkCred(cred.Name, []byte(cred.Pwd)) {
-		token, err := createToken(cred.Name)
-		if err != nil {
-			log.Fatal(err)
-		}
-		json.NewEncoder(response).Encode(token)
-	} else {
-		response.WriteHeader(401)
-	}
-}
-
 //LoginEndpoint checks user credentials in 'users' collection and returns token
 func LoginEndpoint(response http.ResponseWriter, request *http.Request) {
 	response.Header().Add("content-type", "application/json")
@@ -296,7 +280,7 @@ func LoginEndpoint(response http.ResponseWriter, request *http.Request) {
 	var cred Cred
 	json.NewDecoder(request.Body).Decode(&cred)
 	if checkCred(cred.Name, []byte(cred.Pwd)) {
-		token, err := createToken(cred.Name)
+		token, err := createToken(cred.Name, 10)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -306,7 +290,7 @@ func LoginEndpoint(response http.ResponseWriter, request *http.Request) {
 	}
 }
 
-//LogoutEndpoint invokes possible logout procedures on server
+//LogoutEndpoint invokes potential logout procedures on server
 func LogoutEndpoint(response http.ResponseWriter, request *http.Request) {
 	response.Header().Add("content-type", "application/json")
 	response.Header().Add("Access-Control-Allow-Origin", "*")
@@ -314,4 +298,15 @@ func LogoutEndpoint(response http.ResponseWriter, request *http.Request) {
 	json.NewDecoder(request.Body).Decode(&token)
 	log.Println(token)
 	response.WriteHeader(200)
+}
+
+//GetCouponEndpoint return coupon token, which expires after 10 seconds
+func GetCouponEndpoint(response http.ResponseWriter, request *http.Request) {
+	response.Header().Add("content-type", "application/json")
+	response.Header().Add("Access-Control-Allow-Origin", "*")
+	token, err := createToken("default", 10)
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.NewEncoder(response).Encode(token)
 }
