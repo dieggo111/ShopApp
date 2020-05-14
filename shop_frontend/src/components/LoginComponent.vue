@@ -42,7 +42,6 @@ export default {
                     pwd: this.password
             })
             .then(response => {
-                console.log("login", response)
                 this.$router.push("/shop")
                 return response
             })

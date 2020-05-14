@@ -12,8 +12,7 @@ export const store = new Vuex.Store({
         nameList: [],
         priceList: {},
         defaultQuantities: {},
-        transactionStatus: false,
-        coupon: localStorage.getItem("access_token") || null,
+        coupon: localStorage.getItem("coupon_token") || null,
     },
     getters: {
         loggedIn(state) {
@@ -57,13 +56,18 @@ export const store = new Vuex.Store({
         getPriceList(state) {
             return state.priceList
         },
-        getTransactionStatus(state) {
-            return state.transactionStatus
+        getCouponToken(state) {
+            return state.coupon
+        },
+        getAccessToken(state) {
+            return state.token
         }
+        // getTransactionStatus(state) {
+        //     return state.transactionStatus
+        // }
     },
     mutations: {
         retrieveToken(state, token) {
-            console.log("set token", token)
             state.token = token
         },
         destroyToken(state) {
@@ -104,7 +108,7 @@ export const store = new Vuex.Store({
         transactionStatus(state, value) {
             state.transactionStatus = value
         },
-        setCoupon(state, token) {
+        setCouponToken(state, token) {
             state.coupon = token
         }
     },
@@ -188,7 +192,7 @@ export const store = new Vuex.Store({
                         context.commit("transactionStatus", true)
                         resolve(res)
                     } else {
-                        reject(res)
+                        throw new Error("Transaction failed")
                     }
                     })
                 .catch(error => {
@@ -196,14 +200,23 @@ export const store = new Vuex.Store({
                 })
             })
         },
-        getCoupon(context) {
-            fetch('http://localhost:12345/getCoupon')
+        getCoupon(context, username) {
+            return new Promise((resolve, reject) => {
+                fetch('http://localhost:12345/getCoupon', {
+                    method: 'post',
+                    body: username
+                })
                 .then(res => res.json())
                 .then(res => {
                     localStorage.setItem("coupon_token", res)
                     console.log(res)
-                    context.commit("setCoupon", res)
+                    context.commit("setCouponToken", res)
+                    resolve(res)
                 })
+                .catch(error => {
+                    reject(error)
+                })
+            })
         }
     }
 });

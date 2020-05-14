@@ -63,7 +63,7 @@ func main() {
 	router.HandleFunc("/createUser", CreateUserEndpoint).Methods("POST")
 	router.HandleFunc("/login", LoginEndpoint).Methods("POST")
 	router.HandleFunc("/logout", LogoutEndpoint).Methods("POST")
-	router.HandleFunc("/getCoupon", GetCouponEndpoint).Methods("GET")
+	router.HandleFunc("/getCoupon", GetCouponEndpoint).Methods("POST")
 	http.ListenAndServe(port, router)
 }
 
@@ -218,7 +218,7 @@ func createToken(username string, validTime int) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["username"] = username
-	atClaims["exp"] = time.Now().Add(time.Second * validtime).Unix()
+	atClaims["exp"] = time.Now().Add(time.Second * time.Duration(validTime)).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET")))
 	log.Println("token")
@@ -304,7 +304,9 @@ func LogoutEndpoint(response http.ResponseWriter, request *http.Request) {
 func GetCouponEndpoint(response http.ResponseWriter, request *http.Request) {
 	response.Header().Add("content-type", "application/json")
 	response.Header().Add("Access-Control-Allow-Origin", "*")
-	token, err := createToken("default", 10)
+	var user string
+	json.NewDecoder(request.Body).Decode(&user)
+	token, err := createToken("user", 10)
 	if err != nil {
 		log.Fatal(err)
 	}

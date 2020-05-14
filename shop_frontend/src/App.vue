@@ -34,7 +34,6 @@ export default {
             fetch('http://localhost:12345/items')
                 .then(res => res.json())
                 .then(res => {
-                    // console.log(this.addUtilityItems(res))
                     this.$store.commit(
                         "setShopItems", this.addUtilityItems(res))
                     this.prepareCart(res)

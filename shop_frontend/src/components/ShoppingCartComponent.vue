@@ -54,8 +54,6 @@ export default {
             return this.$store.getters.amountInCart
         },
         getCartContent() {
-            console.log("getCartContent")
-            console.log(this.$store.getters.getCartContent)
             return this.$store.getters.getCartContent
         },
         totalAmount() {

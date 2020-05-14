@@ -64,7 +64,6 @@ export default {
                 return null
             }
             var re = /\S+@\S+\.\S+/;
-            console.log(re.test(this.email))
             return re.test(this.email);
         }
     },

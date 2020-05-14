@@ -20,7 +20,7 @@ export default class Discounts {
                     this.setClassProperty(this.volumeDiscountApplied, true)
                     discountItem.type = "".concat(fruit, "-Discount")
                     discountItem.quantity = 1
-                    discountItem.price = "".concat("(-", utils.roundToTwo(1-discount), "%)")
+                    discountItem.price = "".concat("(-", utils.roundToTwo(1-discount)*100, "%)")
                     discountItem.discount = -utils.roundToTwo(sum - sum*discount)
                 }
             }
@@ -50,7 +50,7 @@ export default class Discounts {
 
     calcItemTotal(shoppingList) {
         shoppingList.forEach( item => {
-            item["total"] = item.quantity*item.price
+            item["total"] = utils.roundToTwo(item.quantity*item.price)
         })
         return shoppingList
     }

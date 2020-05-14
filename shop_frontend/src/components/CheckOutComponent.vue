@@ -26,6 +26,12 @@
                     <td>{{ discount.price | euros }}</td>
                     <td>{{ discount.discount | euros }}</td>
                 </tr>
+                <tr :key="coupon.type" v-for="coupon in getCouponList">
+                    <td>{{ coupon.type }}</td>
+                    <td>{{ coupon.quantity }}</td>
+                    <td>{{ coupon.price | euros }}</td>
+                    <td>{{ coupon.discount | euros }}</td>
+                </tr>
                 <tr>
                     <th></th>
                     <th></th>
@@ -41,13 +47,20 @@
         </table>
 
         <template>
-            <b-button class="coupon-button" @click="$bvModal.show('coupon-modal')" variant="primary">Redeem coupon</b-button>
-            <b-button class="purchase-button" @click="$bvModal.show('purchase-modal');checkPayment()" variant="primary">Purchase items</b-button>
+            <b-button class="coupon-button" variant="primary"
+            @click="$bvModal.show('coupon-modal');getCoupon()">Redeem coupon</b-button>
+            <b-button class="purchase-button" variant="primary"
+            @click="$bvModal.show('purchase-modal');checkPayment()">Purchase items</b-button>
         </template>
 
         <b-modal id="purchase-modal" :title="forPurchaseModal">
             <template v-if="getPaymentStatus">
-                Transaction completed. Thank you for shopping.
+                <p>Transaction completed. Thank you for shopping.</p>
+                <p><b>Total price: {{ this.getTotalAmount() | euros }}</b></p>
+                <p><b>Total savings: {{ this.getTotalSavings() | euros }}</b></p>
+                <template v-if="isExpired()">
+                    <p>(Your coupon has expired)</p>
+                </template>
             </template>
             <template v-else>
                 Transaction failed.
@@ -63,14 +76,24 @@
         </b-modal>
 
         <b-modal id="coupon-modal" title="Coupon redeemed">
-            <template v-slot:default>
+            <!-- <template v-slot:default> -->
+            <template v-if="!this.isExpired()">
                 Reviece a bonus discount for a limited amount of time.
             </template>
-            <b-button @click="$bvModal.hide('cart-modal')">OK</b-button>
+            <template v-else>
+                You already redeemed your coupon.
+            </template>
+            <template v-slot:modal-footer>
+                <b-button @click="$bvModal.hide('coupon-modal')">OK</b-button>
+            </template>
         </b-modal>
+        <!-- <b-modal id="expired-modal" title="Coupon expired">
+            <template v-slot:default>
+                Unfortunately, your coupon has expired.
+            </template>
+            <b-button @click="$bvModal.hide('cart-modal')">OK</b-button>
+        </b-modal> -->
     </b-container>
-    <!-- <b-container class="redeem-box">
-    </b-container> -->
 </template>
 
 
@@ -78,6 +101,7 @@
 import Discounts from "../discounts"
 import utils from "../utils"
 import { euros } from "../filters"
+import jwt from "jsonwebtoken"
 
 export default {
     name: "Checkout",
@@ -110,10 +134,12 @@ export default {
         getDiscountList() {
             return this.discountList.filter(item => item.discount != 0)
         },
+        getCouponList() {
+            return this.couponList.filter(item => item.discount != 0)
+        },
         getPaymentStatus() {
-            console.log(this.payment)
             return this.payment
-        }
+        },
     },
     methods: {
         getTotalAmount() {
@@ -121,15 +147,24 @@ export default {
             this.$store.getters.getShoppingList.forEach( item => {
                 sum += item.total
             })
+            return utils.roundToTwo(sum)
+        },
+        getTotalSavings() {
+            var sum = 0
             this.discountList.forEach( item => {
                 sum += item.discount
             })
+            if (!this.isExpired()) {
+                this.couponList.forEach( item => {
+                    sum += item.discount
+                })
+            }
             return utils.roundToTwo(sum)
+
         },
         applyDiscounts() {
             this.discountList.push(
                 this.discounts.extractSets(this.$store.getters.getShoppingList))
-            // console.log(this.discounts.volumeDiscount(this.$store.getters.getShoppingList))
             this.discountList.push(
                 this.discounts.volumeDiscount(this.$store.getters.getShoppingList))
         },
@@ -139,33 +174,51 @@ export default {
                         this.$store.getters.getShoppingList, "Orange", 1, 0.7))
         },
         resetCart() {
-            console.log("reset")
-            // this.$store.dispatch("resetShop")
+            // console.log("reset")
+            this.$store.dispatch("resetShop")
         },
         checkPayment() {
             this.$store.dispatch("checkPayment")
                 .then(res => {
-                    this.payment = res
+                    this.payment = true
                     return res
                 })
                 .catch(error => {
-                    console.log("Transaction failed")
                     console.log("Response: ", error)
                     this.payment = false
                 })
         },
         getCoupon() {
-            this.$store.dispatch("getCoupon")
+            console.log(this.isExpired())
+            if (this.isExpired() === false) {
+                this.$store.dispatch(
+                    "getCoupon",
+                    jwt.decode(this.$store.getters.getAccessToken).username
+                )
                 .then(res => {
                     this.payment = res
+                    this.applyCoupon()
                     return res
                 })
                 .catch(error => {
-                    console.log("Transaction failed")
-                    console.log("Response: ", error)
-                    this.payment = false
+                    console.log(error)
                 })
-        }
+            }
+        },
+        isExpired() {
+            try {
+            var expirationDate = new Date(
+                jwt.decode(this.$store.getters.getCouponToken).exp * 1000)
+            if (expirationDate < Date.now()) {
+                console.log("expired")
+                return true
+            }
+            return false
+            } catch {
+                return false
+            }
+        },
+
     }
 }
 </script>
