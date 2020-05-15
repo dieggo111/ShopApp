@@ -1,3 +1,5 @@
+Set Up Project
+==============
 1) Pull mongo image:
 
     docker pull mongo
