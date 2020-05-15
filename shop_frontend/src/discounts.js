@@ -34,10 +34,12 @@ export default class Discounts {
         var sets = 0
         var newName = "".concat(fruitA, "&", fruitB, "-Sets")
         if (shoppingList.length == 0) {
-            return shoppingList
+            return null
         }
-
         var props = this.getItemProperties(shoppingList, fruitA, fruitB)
+        if (Object.keys(props).length < 4) {
+            return null
+        }
         sets = this.getNumberOfSets(props.quantityA, props.quantityB, groupA, groupB)
         this.setClassProperty(this.setDiscountApplied, sets != 0)
         var pricePerSet = (groupA*props.priceA + groupB*props.priceB)*discount

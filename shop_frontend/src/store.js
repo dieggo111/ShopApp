@@ -171,7 +171,6 @@ export const store = new Vuex.Store({
                 if (localStorage.getItem("cart") === null) {
                     context.commit("setCart", cart)
                 } else {
-                    console.log("not null")
                     context.commit("setCart", JSON.parse(localStorage.getItem("cart")))
                 }
             }

@@ -70,13 +70,9 @@
                 <b-button @click="resetCart" variant="primary"
                     href="/shop">Back to shop</b-button>
             </template>
-            <!-- <b-button @click="resetCart" variant="danger"
-                href="/shop">Cancel purchase</b-button>
-            </template> -->
         </b-modal>
 
         <b-modal id="coupon-modal" title="Coupon redeemed">
-            <!-- <template v-slot:default> -->
             <template v-if="!this.isExpired()">
                 Reviece a bonus discount for a limited amount of time.
             </template>
@@ -87,12 +83,6 @@
                 <b-button @click="$bvModal.hide('coupon-modal')">OK</b-button>
             </template>
         </b-modal>
-        <!-- <b-modal id="expired-modal" title="Coupon expired">
-            <template v-slot:default>
-                Unfortunately, your coupon has expired.
-            </template>
-            <b-button @click="$bvModal.hide('cart-modal')">OK</b-button>
-        </b-modal> -->
     </b-container>
 </template>
 
@@ -147,6 +137,7 @@ export default {
             this.$store.getters.getShoppingList.forEach( item => {
                 sum += item.total
             })
+            sum += this.getTotalSavings()
             return utils.roundToTwo(sum)
         },
         getTotalSavings() {
@@ -163,8 +154,10 @@ export default {
 
         },
         applyDiscounts() {
-            this.discountList.push(
-                this.discounts.extractSets(this.$store.getters.getShoppingList))
+            var setDiscount = this.discounts.extractSets(this.$store.getters.getShoppingList)
+            if (setDiscount != null) {
+                this.discountList.push(setDiscount)
+            }
             this.discountList.push(
                 this.discounts.volumeDiscount(this.$store.getters.getShoppingList))
         },
@@ -172,6 +165,7 @@ export default {
             this.couponList.push(
                     this.discounts.volumeDiscount(
                         this.$store.getters.getShoppingList, "Orange", 1, 0.7))
+            console.log(this.couponList)
         },
         resetCart() {
             // console.log("reset")
