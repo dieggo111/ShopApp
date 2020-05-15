@@ -189,7 +189,6 @@ export default {
                 })
         },
         getCoupon() {
-            console.log(this.isExpired())
             if (this.isExpired() === false) {
                 this.$store.dispatch(
                     "getCoupon",
@@ -210,7 +209,6 @@ export default {
             var expirationDate = new Date(
                 jwt.decode(this.$store.getters.getCouponToken).exp * 1000)
             if (expirationDate < Date.now()) {
-                console.log("expired")
                 return true
             }
             return false

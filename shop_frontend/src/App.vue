@@ -3,9 +3,9 @@
         <b-navbar class="navbar" fixed="top" variant="info" type="dark">
             <b-navbar-brand  tag="h1" class="mb-0" href="/shop">The Fruit Shop</b-navbar-brand>
             <b-navbar-nav class="nav">
-                <b-nav-item class="nav-item" href="/signup">Sign Up</b-nav-item>
-                <b-nav-item v-if="loggedIn" class="nav-item" href="/logout">Logout</b-nav-item>
-                <b-nav-item v-if="!loggedIn" class="nav-item" href="/login">Login</b-nav-item>
+                <b-nav-item class="nav-item mr-auto" href="/signup">Sign Up</b-nav-item>
+                <b-nav-item class="nav-item mr-auto" v-if="loggedIn" href="/logout">Logout</b-nav-item>
+                <b-nav-item class="nav-item mr-auto" v-if="!loggedIn" href="/login">Login</b-nav-item>
             </b-navbar-nav>
         </b-navbar>
         <router-view></router-view>

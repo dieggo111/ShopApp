@@ -125,7 +125,6 @@ export const store = new Vuex.Store({
                         throw new Error(res.status)
                     })
                     .then(res => {
-                        console.log(res)
                         localStorage.setItem("access_token", res)
                         context.commit("retrieveToken", res)
                         resolve(res)
@@ -209,7 +208,6 @@ export const store = new Vuex.Store({
                 .then(res => res.json())
                 .then(res => {
                     localStorage.setItem("coupon_token", res)
-                    console.log(res)
                     context.commit("setCouponToken", res)
                     resolve(res)
                 })
@@ -217,7 +215,22 @@ export const store = new Vuex.Store({
                     reject(error)
                 })
             })
-        }
+        },
+        signupUser(context, creds) {
+            return new Promise((resolve, reject) => {
+                fetch('http://localhost:12345/createUser', {
+                    method: 'post',
+                    body: JSON.stringify(creds)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    resolve(res)
+                })
+                .catch(error => {
+                    reject(error)
+                })
+            })
+        },
     }
 });
 
