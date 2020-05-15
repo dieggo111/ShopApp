@@ -167,10 +167,13 @@ export const store = new Vuex.Store({
             context.commit("setShoppingList", cartContent)
         },
         initCart(context, cart) {
-            if (localStorage.getItem("cart") === null) {
-                context.commit("setCart", cart)
-            } else {
-                context.commit("setCart", JSON.parse(localStorage.getItem("cart")))
+            if (typeof(cart) != 'undefined') {
+                if (localStorage.getItem("cart") === null) {
+                    context.commit("setCart", cart)
+                } else {
+                    console.log("not null")
+                    context.commit("setCart", JSON.parse(localStorage.getItem("cart")))
+                }
             }
         },
         resetShop(context) {
